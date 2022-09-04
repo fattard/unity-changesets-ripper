@@ -12,7 +12,8 @@ namespace UnityChangesetsRipper
 
         static string unityArchiveURL = "https://unity3d.com/get-unity/download/archive";
 
-        static string unityPatchesURL = "https://web.archive.org/web/20200531192759/https://unity3d.com/unity/qa/patch-releases?page={0}";
+        //static string unityPatchesURL = "https://web.archive.org/web/20200531192759/https://unity3d.com/unity/qa/patch-releases?page={0}";
+        static string unityPatchesURL = "https://unity3d.com/unity/qa/patch-releases/{0}.{1}.{2}p{3}";
 
         static void Main(string[] args)
         {
@@ -23,11 +24,37 @@ namespace UnityChangesetsRipper
             ExtractChangesetsUnityHubURIs(unityArchiveRAW);
             ExtractChangesetsSetupLink(unityArchiveRAW, "5.");
 
-            for (int i = 1; i < 24; i++)
+            /*for (int i = 1; i < 40; i++)
             {
                 unityArchiveRAW = DownloadURLAsText(string.Format(unityPatchesURL, i));
                 ExtractChangesetsSetupLink(unityArchiveRAW, "5.");
+            }*/
+
+            for (int major = 5; major < 2018; major++)
+            {
+                if (major == 6)
+                    major = 2017;
+
+                for (int minor = 0; minor < 7; minor++)
+                {
+                    if (major >= 2017 && minor > 2)
+                        break;
+
+                    if (major >= 2017 && minor == 0)
+                        minor++;
+
+                    for (int fix = 0; fix < 10; fix++)
+                    {
+                        for (int p = 1; p < 10; p++)
+                        {
+                            unityArchiveRAW = DownloadURLAsText(string.Format(unityPatchesURL, major, minor, fix, p));
+                            ExtractChangesetsSetupLink(unityArchiveRAW, major + ".");
+                        }
+                    }
+                }
             }
+
+
 
             ExportChangesetList();
         }
@@ -124,9 +151,17 @@ namespace UnityChangesetsRipper
         {
             string rawTxt = null;
 
-            using (System.Net.WebClient webClient = new System.Net.WebClient())
+            try
             {
-                rawTxt = webClient.DownloadString(aAddress);
+                Console.WriteLine("checking at: " + aAddress);
+                using (System.Net.WebClient webClient = new System.Net.WebClient())
+                {
+                    rawTxt = webClient.DownloadString(aAddress);
+                }
+            }
+            catch(System.Net.WebException e)
+            {
+                rawTxt = "";
             }
 
             return rawTxt;
