@@ -12,6 +12,8 @@ namespace UnityChangesetsRipper
 
         static string unityArchiveURL = "https://unity3d.com/get-unity/download/archive";
 
+        static string unityPatchesURL = "https://web.archive.org/web/20200531192759/https://unity3d.com/unity/qa/patch-releases?page={0}";
+
         static void Main(string[] args)
         {
             changesetsFound = new List<string>(1000);
@@ -20,6 +22,12 @@ namespace UnityChangesetsRipper
 
             ExtractChangesetsUnityHubURIs(unityArchiveRAW);
             ExtractChangesetsSetupLink(unityArchiveRAW, "5.");
+
+            for (int i = 1; i < 24; i++)
+            {
+                unityArchiveRAW = DownloadURLAsText(string.Format(unityPatchesURL, i));
+                ExtractChangesetsSetupLink(unityArchiveRAW, "5.");
+            }
 
             ExportChangesetList();
         }
