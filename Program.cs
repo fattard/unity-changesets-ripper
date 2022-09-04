@@ -19,6 +19,7 @@ namespace UnityChangesetsRipper
             string unityArchiveRAW = DownloadURLAsText(unityArchiveURL);
 
             ExtractChangesetsUnityHubURIs(unityArchiveRAW);
+            ExtractChangesetsSetupLink(unityArchiveRAW, "5.");
 
             ExportChangesetList();
         }
@@ -26,6 +27,7 @@ namespace UnityChangesetsRipper
 
         static void ExportChangesetList()
         {
+            changesetsFound = changesetsFound.Distinct().ToList();
             changesetsFound = changesetsFound.OrderBy(x => x.Substring(13).Trim()).ToList();
 
             StringBuilder sb = new StringBuilder(1000 * 30);
@@ -62,11 +64,51 @@ namespace UnityChangesetsRipper
         }
 
 
+        static void ExtractChangesetsSetupLink(string rawStr, string verPattern)
+        {
+            string pattern = "/Windows64EditorInstaller/UnitySetup64-" + verPattern;
+
+            int i = 0;
+            while (i < rawStr.Length)
+            {
+                int idx = rawStr.IndexOf(pattern, i);
+                if (idx > 0)
+                {
+                    // Go back 12 chars
+                    idx -= 12;
+
+                    int j = idx;
+                    while (rawStr[j] != '\"')
+                    {
+                        j++;
+                    }
+
+                    changesetsFound.Add(SplitChangesetDonwloadWin64Link(rawStr.Substring(idx, j - idx)));
+
+                    i = j;
+                }
+                else
+                {
+                    break;
+                }
+            }
+        }
+
+
         static string SplitChangesetUnityHubURI(string aStr)
         {
             string s = aStr.Replace("unityhub://", "");
             var parts = s.Split('/');
             return parts[1] + " " + parts[0];
+        }
+
+
+        static string SplitChangesetDonwloadWin64Link(string aStr)
+        {
+            // Sample
+            //var s = "e80cc3114ac1/Windows64EditorInstaller/UnitySetup64-5.6.7f1.exe";
+
+            return aStr.Replace("/Windows64EditorInstaller/UnitySetup64-", " ").Replace(".exe", "");
         }
 
 
