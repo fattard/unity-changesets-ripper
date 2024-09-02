@@ -10,7 +10,8 @@ namespace UnityChangesetsRipper
     {
         static List<string> changesetsFound;
 
-        static string unityArchiveURL = "https://unity3d.com/get-unity/download/archive";
+        //static string unityArchiveURL = "https://unity3d.com/get-unity/download/archive";
+        static string unityArchiveURL = "https://unity.com/en/releases/editor/archive";
 
         //static string unityPatchesURL = "https://web.archive.org/web/20200531192759/https://unity3d.com/unity/qa/patch-releases?page={0}";
         static string unityPatchesURL = "https://unity3d.com/unity/qa/patch-releases/{0}.{1}.{2}p{3}";
@@ -87,8 +88,10 @@ namespace UnityChangesetsRipper
                         j++;
                     }
 
-                    changesetsFound.Add(SplitChangesetUnityHubURI(rawStr.Substring(idx, j - idx)));
-
+                    if (rawStr[j+1] != ']')
+                    {
+                        changesetsFound.Add(SplitChangesetUnityHubURI(rawStr.Substring(idx, j - idx)));
+                    }
                     i = j;
                 }
                 else
@@ -132,7 +135,7 @@ namespace UnityChangesetsRipper
 
         static string SplitChangesetUnityHubURI(string aStr)
         {
-            string s = aStr.Replace("unityhub://", "");
+            string s = aStr.Replace("unityhub://", "").Replace("\\", "");
             var parts = s.Split('/');
             return parts[1] + " " + parts[0];
         }
